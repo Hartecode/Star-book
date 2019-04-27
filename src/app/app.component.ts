@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'star-book';
+  numbers = Array(5).fill().map((x,i)=>i);
 }

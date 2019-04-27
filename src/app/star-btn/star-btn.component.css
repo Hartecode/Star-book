@@ -1,0 +1,20 @@
+button {
+    border: none;
+    padding: 0;
+    position: relative;
+}
+
+mat-icon {
+    color: #c500c5;
+    display: inline;
+    font-size: 125px;
+}
+
+.star-number {
+    color: #333333;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+}
