@@ -4,6 +4,10 @@ button {
     position: relative;
 }
 
+button:focus {
+    z-index: 1;
+}
+
 mat-icon {
     color: #c500c5;
     display: inline;

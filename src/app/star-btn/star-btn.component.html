@@ -1,4 +1,4 @@
 <button (click)="onClick()">
-  <mat-icon>{{icon}}</mat-icon> 
-  <div class="star-number">1</div>
+  <mat-icon>{{selected ? 'star' : 'star_border'}}</mat-icon> 
+  <div class="star-number">{{number}}</div>
 </button>

@@ -1,0 +1,17 @@
+<p>total stars: {{filledStars$ | async}}</p>
+<p>page: {{(page$ | async) + 1}} of {{totalPages$ | async}}</p>
+<span>
+    <button *ngFor="let l of limits" (click)="setLimit(l)">{{ l }}</button>
+</span>
+<br>
+<button 
+  (click)="shiftPage(-1)" 
+  [disabled]="(page$ | async) < 1">back</button>
+<button 
+  (click)="shiftPage(1)"
+  [disabled]="isLastPage$ | async">next</button>
+<ul>
+  <li *ngFor="let star of (stars$ | async); let i = index">
+      <app-star-btn [selected]="star <= (filledStars$ | async)" [number]="star" (status)="test($event)" ></app-star-btn>
+  </li>
+</ul>
