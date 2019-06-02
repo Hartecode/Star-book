@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject,  combineLatest  } from 'rxjs';
-import { distinctUntilChanged, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, shareReplay, take, tap } from 'rxjs/operators';
+import { IndexDBService } from './index-db.service';
 
 const starsArr = new Array(1000).fill('').map((x, i) => i + 1 );
 const LIMIT_LOW = 25;
@@ -12,11 +13,19 @@ export const LIMITS = [LIMIT_LOW, LIMIT_MID, LIMIT_HIGH];
   providedIn: 'root'
 })
 export class StarService {
+
   private totalBS = new BehaviorSubject(starsArr.slice(0, LIMIT_LOW));
   private starCountBS = new BehaviorSubject(7);
   private pageBS = new BehaviorSubject(0);
   private limitBS = new BehaviorSubject(LIMIT_LOW);
   private startsWithBS = new BehaviorSubject('');
+
+  constructor(private dataBase: IndexDBService) {
+    (async () => {
+      const totalStars = await this.dataBase.totalStars;
+      console.log(totalStars);
+    })();
+  }
 
   total$ = this.totalBS.asObservable();
   page$ = this.pageBS.asObservable();
