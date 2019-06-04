@@ -1,37 +1,26 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
-export class IndexDBService {
+export class IndexDBService implements OnDestroy {
 
-  constructor() {
-    console.log('working!!');
-    if (window.indexedDB) {
-      this.startDB();
-    } else {
-      alert('No indexedDB in your browser');
-    }
-  }
-
+  private db;
+  private store;
   public totalStars: number;
 
-  startDB() {
 
-    // if (!window.indexedDB) console.log( )
-    // window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexeddb;
+  constructor() {
+  }
 
-    let request = window.indexedDB.open('StarDB', 1),
-    db,
-    tx,
-    store,
-    index;
+  startDB(): boolean {
+    const request = window.indexedDB.open('StarDB', 1);
 
     request.onupgradeneeded = (e) => {
-      let db = request.result;
-      let store = db.createObjectStore('StarStore', {keyPath: 'ID'});
-      // let store = db.createObjectStore('StarStore', {autoIncrement: true});
-      let index = store.createIndex('starTotal', 'starTotal', {unique: false});
+      // The database did not previously exist, so create object stores and indexes.
+      this.db = request.result;
+      this.store = this.db.createObjectStore('StarStore', {keyPath: 'ID'});
+      this.store.put({ID: 1, starTotal: 0});
     };
 
     request.onerror = (e) => {
@@ -39,31 +28,53 @@ export class IndexDBService {
     };
 
     request.onsuccess = (e) => {
-      db = request.result;
-      tx = db.transaction('StarStore', 'readwrite');
-      store = tx.objectStore('StarStore');
-      index = store.index('starTotal');
+      this.db = request.result;
+      console.log(`success: ${JSON.stringify(this.db)}`);
+    };
 
-      db.onerror = (e) => {
-        console.log(`Error: ${e.target.errorCode}`);
-      };
+    return true;
+  }
 
-      // store.put({ID: 1, starTotal: 100});
 
-      const totalId = store.get(1);
+  add(num: number) {
+    const transaction = this.db.transaction('StarStore', 'readwrite')
+    const objectStore = transaction.objectStore('StarStore');
+    const request = objectStore.put({ ID: 1, starTotal: num });
 
-      totalId.onsuccess = () => {
-        this.totalStars = totalId.result;
-      };
+    request.onsuccess = function(e) {
+       console.log(`updated a value in db to ${num}`);
+    };
 
-      const total = index.get(7);
-
-      total.onsuccess = () => {
-        // console.log(total.result);
-      };
-
-      tx.oncomplete = () => db.close;
+    request.onerror = function(e) {
+      e.preventDefault();
+      console.log(request.error);
+      console.log(`Unable to update the db: ${JSON.stringify(e.target)}`);
     };
   }
 
+  read() {
+    const transaction = this.db.transaction('StarStore');
+    const objectStore = transaction.objectStore('StarStore');
+    const request = objectStore.get(1);
+
+    request.onerror = (e) => {
+      console.log('Unable to retrieve data from database!');
+    };
+
+    request.onsuccess = (e) => {
+      // Do something with the request.result!
+      if (request.result) {
+          console.log(`The current results are ${request.result.starTotal}`);
+          return request.result.starTotal;
+      } else {
+          console.log('Can\'t find info in database!');
+      }
+    };
+  }
+
+  ngOnDestroy() {
+    if (window.indexedDB) {
+      this.db.close();
+    }
+  }
 }

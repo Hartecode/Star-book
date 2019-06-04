@@ -15,17 +15,12 @@ export const LIMITS = [LIMIT_LOW, LIMIT_MID, LIMIT_HIGH];
 export class StarService {
 
   private totalBS = new BehaviorSubject(starsArr.slice(0, LIMIT_LOW));
-  private starCountBS = new BehaviorSubject(7);
+  private starCountBS = new BehaviorSubject(this.dataBase.read());
   private pageBS = new BehaviorSubject(0);
   private limitBS = new BehaviorSubject(LIMIT_LOW);
   private startsWithBS = new BehaviorSubject('');
 
-  constructor(private dataBase: IndexDBService) {
-    (async () => {
-      const totalStars = await this.dataBase.totalStars;
-      console.log(totalStars);
-    })();
-  }
+  constructor(private dataBase: IndexDBService) {}
 
   total$ = this.totalBS.asObservable();
   page$ = this.pageBS.asObservable();
@@ -79,6 +74,7 @@ export class StarService {
   }
 
   updateCount(num) {
+      this.dataBase.add(num);
     this.starCountBS.next(num);
   }
 }
