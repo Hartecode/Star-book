@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component} from '@angular/core';
 import { StarService, LIMITS } from '../services/star.service';
 
 @Component({
@@ -6,7 +6,7 @@ import { StarService, LIMITS } from '../services/star.service';
   templateUrl: './star-bundle.component.html',
   styleUrls: ['./star-bundle.component.css']
 })
-export class StarBundleComponent implements OnInit {
+export class StarBundleComponent {
 
   public filledStars = 6;
   total$ = this.starService.total$;
@@ -20,9 +20,6 @@ export class StarBundleComponent implements OnInit {
   limits = LIMITS;
 
   constructor( private starService: StarService) { }
-
-  ngOnInit() {
-  }
 
   setLimit(num: number) {
     this.starService.setLimit(num);
