@@ -10,9 +10,10 @@ export class AppComponent {
 
   public loaded: boolean;
 
-  constructor(private dataBase: IndexDBService) {
+  constructor(public dataBase: IndexDBService) {
     if (window.indexedDB) {
-      this.loaded = this.dataBase.startDB();
+      this.dataBase.startDB();
+      this.loaded = this.dataBase.loaded;
     } else {
       alert(`Your browser doesn't support indexedDB`);
     }

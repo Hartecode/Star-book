@@ -15,7 +15,6 @@ export const LIMITS = [LIMIT_LOW, LIMIT_MID, LIMIT_HIGH];
 export class StarService {
 
   private totalBS = new BehaviorSubject(starsArr.slice(0, LIMIT_LOW));
-  private starCountBS = new BehaviorSubject(this.dataBase.read());
   private pageBS = new BehaviorSubject(0);
   private limitBS = new BehaviorSubject(LIMIT_LOW);
   private startsWithBS = new BehaviorSubject('');
@@ -24,7 +23,7 @@ export class StarService {
 
   total$ = this.totalBS.asObservable();
   page$ = this.pageBS.asObservable();
-  starCount$ = this.starCountBS.asObservable();
+  starCount$ = this.dataBase.totalStars$;
   limit$ = this.limitBS.asObservable().pipe(distinctUntilChanged());
   totalPages$ = this.limit$.pipe(
     map((limit) => Math.ceil(1000 / limit)),
@@ -74,7 +73,7 @@ export class StarService {
   }
 
   updateCount(num) {
-      this.dataBase.add(num);
-    this.starCountBS.next(num);
+    this.dataBase.add(num);
+    this.dataBase.read();
   }
 }

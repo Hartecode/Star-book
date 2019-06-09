@@ -1,4 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -7,13 +8,15 @@ export class IndexDBService implements OnDestroy {
 
   private db;
   private store;
-  public totalStars: number;
+  private totalStarsBS = new BehaviorSubject(0);
+  public totalStars$ = this.totalStarsBS.asObservable();
+  public loaded = false;
 
 
   constructor() {
   }
 
-  startDB(): boolean {
+  startDB() {
     const request = window.indexedDB.open('StarDB', 1);
 
     request.onupgradeneeded = (e) => {
@@ -29,20 +32,20 @@ export class IndexDBService implements OnDestroy {
 
     request.onsuccess = (e) => {
       this.db = request.result;
-      console.log(`success: ${JSON.stringify(this.db)}`);
+      console.log(`success: ${JSON.stringify(Object.keys(this.db.objectStoreNames))}`, request);
+      this.read();
+      this.loaded = true;
     };
-
-    return true;
   }
 
 
   add(num: number) {
-    const transaction = this.db.transaction('StarStore', 'readwrite')
+    const transaction = this.db.transaction('StarStore', 'readwrite');
     const objectStore = transaction.objectStore('StarStore');
-    const request = objectStore.put({ ID: 1, starTotal: num });
+    const request = objectStore.put({ ID: '1', starTotal: num });
 
     request.onsuccess = function(e) {
-       console.log(`updated a value in db to ${num}`);
+      console.log(`updated a value in db to ${num}`);
     };
 
     request.onerror = function(e) {
@@ -55,7 +58,9 @@ export class IndexDBService implements OnDestroy {
   read() {
     const transaction = this.db.transaction('StarStore');
     const objectStore = transaction.objectStore('StarStore');
-    const request = objectStore.get(1);
+    const request = objectStore.get('1');
+
+    let total: number;
 
     request.onerror = (e) => {
       console.log('Unable to retrieve data from database!');
@@ -65,11 +70,15 @@ export class IndexDBService implements OnDestroy {
       // Do something with the request.result!
       if (request.result) {
           console.log(`The current results are ${request.result.starTotal}`);
-          return request.result.starTotal;
+          total = request.result.starTotal;
+          this.totalStarsBS.next(total);
       } else {
           console.log('Can\'t find info in database!');
       }
     };
+  }
+
+  setAmount() {
   }
 
   ngOnDestroy() {
